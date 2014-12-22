@@ -1,19 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ua.pti.myatm;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.mockito.InOrder;
 import static org.mockito.Mockito.*;
 
 /**
  *
- * @author andrii
+ * @author oleg
  */
 public class ATMTest {
 
@@ -197,5 +191,68 @@ public class ATMTest {
         inOrder.verify(account).getBalance();
         inOrder.verify(account).withdraw(withdraw);
         assertEquals(800.0, atm.getMoneyInATM(), 0.0);
+    }
+
+    /**
+     * ****Boundary tests*****
+     */
+    @Test
+    public void ATMCreatingBoundaryTest() {
+        //just create ATM with boundary money value
+        ATM atm = new ATM(0);
+    }
+    
+    @Test
+    public void getCashBoundaryAmountTest() throws Exception {
+        ATM atm = new ATM(1000.0);
+        double withdraw = 0.0;
+
+        Account account = mock(Account.class);
+        when(account.getBalance()).thenReturn(5000.0);
+        when(account.withdraw(withdraw)).thenReturn(withdraw);
+
+        Card card = mock(Card.class);
+        when(card.isBlocked()).thenReturn(Boolean.FALSE);
+        when(card.checkPin(anyInt())).thenReturn(Boolean.TRUE);
+        when(card.getAccount()).thenReturn(account);
+
+        atm.validateCard(card, DEFAULT_PIN);
+        atm.getCash(withdraw);
+    }
+    
+    @Test
+    public void getCashAccountBalanceEqualToAmountTest() throws Exception {
+        ATM atm = new ATM(1000.0);
+        double withdraw = 200.0;
+
+        Account account = mock(Account.class);
+        when(account.getBalance()).thenReturn(withdraw);
+        when(account.withdraw(withdraw)).thenReturn(withdraw);
+
+        Card card = mock(Card.class);
+        when(card.isBlocked()).thenReturn(Boolean.FALSE);
+        when(card.checkPin(anyInt())).thenReturn(Boolean.TRUE);
+        when(card.getAccount()).thenReturn(account);
+
+        atm.validateCard(card, DEFAULT_PIN);
+        atm.getCash(withdraw);
+    }
+    
+    @Test
+    public void getCashMoneyInATMEqualToAmountTest() throws Exception {
+        double withdraw = 200.0;
+        ATM atm = new ATM(withdraw);
+
+        Account account = mock(Account.class);
+        when(account.getBalance()).thenReturn(withdraw);
+        when(account.withdraw(withdraw)).thenReturn(withdraw);
+
+        Card card = mock(Card.class);
+        when(card.isBlocked()).thenReturn(Boolean.FALSE);
+        when(card.checkPin(anyInt())).thenReturn(Boolean.TRUE);
+        when(card.getAccount()).thenReturn(account);
+
+        atm.validateCard(card, DEFAULT_PIN);
+        atm.getCash(withdraw);
     }
 }
